@@ -1,0 +1,9 @@
+{
+    "PAST_HISTORY": 16,
+    "FUTURE_TARGET": 8,
+    "BATCH_SIZE": 1024,
+    "EPOCHS": 500,
+    "BUFFER_SIZE": 200000,
+    "NUM_1_NEURONS": 64,
+    "NUM_2_NEURONS": 64
+}
