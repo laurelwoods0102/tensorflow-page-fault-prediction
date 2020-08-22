@@ -1,0 +1,10 @@
+{
+    "PAST_HISTORY": 16,
+    "FUTURE_TARGET": 8,
+    "BUFFER_SIZE": 200000,
+    "ACTIVATION": "softmax",
+    "LOSS_FUNCTION": "categorical_crossentropy",
+    "VAL_SPLIT": 0.2,
+    "METRIC_ACCURACY": "accuracy",
+    "OPTIMIZER": "adam"
+}
