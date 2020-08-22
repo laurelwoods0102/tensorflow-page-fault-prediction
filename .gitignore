@@ -4,18 +4,6 @@
 /로그 데이터
 
 /data
-
-/NU/data
-/SEG/data
-
-/StreamBench_1G1P/data
-/StreamBench_1G2P/data
-/StreamBench_1G3P/data
-
-/StreamBench_2G1P/data
-/StreamBench_2G2P/data
-/StreamBench_2G3P/data
-
-/StreamBench_3G1P/data
-/StreamBench_3G2P/data
-/StreamBench_3G3P/data
+/**/data
+/**/version
+/**/logs
