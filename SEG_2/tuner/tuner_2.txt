@@ -1,0 +1,9 @@
+layer_1_units : 177 
+layer_1_dropout : 0.1 
+layer_2_units : 177 
+layer_2_dropout : 0.2 
+learning_rate : 0.01 
+tuner/epochs : 25 
+tuner/initial_epoch : 0 
+tuner/bracket : 0 
+tuner/round : 0 

@@ -1,0 +1,18 @@
+Results summary
+|-Results in test_dir/NU_hyper_model_2
+|-Showing 10 best trials
+|-Objective(name='val_accuracy', direction='max')
+Trial summary
+|-Trial ID: 78b57fbfc43616b33a983bd74bfdc7e1
+|-Score: 0.524702787399292
+|-Best step: 0
+Hyperparameters:
+|-layer_1_dropout: 0.2
+|-layer_1_units: 56
+|-layer_2_dropout: 0.1
+|-layer_2_units: 40
+|-learning_rate: 0.01
+|-tuner/bracket: 0
+|-tuner/epochs: 10
+|-tuner/initial_epoch: 0
+|-tuner/round: 0
