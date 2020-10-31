@@ -4,7 +4,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorboard.plugins.hparams import api as hp_api
-import tensorflow_addons as tfa
+import kerastuner
 import numpy as np
 import pandas as pd
 import os
@@ -38,32 +38,26 @@ os.makedirs(log_dir)
 os.makedirs(version_dir)
 timestamp
 
+
 # %%
-dataset_name = "NU_AR"
+dataset_name = "SEG_AR"
 
 
 # %%
 static_params = {
     'PAST_HISTORY': 16,
     'FUTURE_TARGET': 8,
-    'BATCH_SIZE': 1024,
+    'BATCH_SIZE': 512,
     'BUFFER_SIZE': 200000,
     'EPOCHS': 500,
+    'VOCAB_SIZE': 16293
  }
-
-
-# %%
-with open(path + "/static/pipeline.pkl", "rb") as p:
-    pipeline = dill.load(p)
-
-static_params["VOCAB_SIZE"] = pipeline["sparse_category_encoder"].vocab_size
-static_params
 
 
 # %%
 hparams_simple = {
     "HP_LSTM_1_UNITS" : 128,
-    "HP_LSTM_1_DROPOUT" : 0.0,
+    "HP_LSTM_1_DROPOUT" : 0.5,
     "HP_LEARNING_RATE" : 1e-3,
 }
 
@@ -98,27 +92,21 @@ def generate_timeseries(dataset, start_index, end_index, history_size, target_si
 
 
 # %%
-train_set = np.genfromtxt(path + "/data/{}_train_set.csv".format(dataset_name), delimiter="\n", dtype=np.int32)
+train_set = np.genfromtxt(path + "/data/SEG_train_set.csv", delimiter="\n", dtype=np.int32)
 x_train, y_train = generate_timeseries(train_set, 0, None, static_params["PAST_HISTORY"], static_params["FUTURE_TARGET"])
 train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train_data = train_data.cache().batch(static_params["BATCH_SIZE"]).shuffle(static_params["BUFFER_SIZE"])
 
 
 # %%
-val_set = np.genfromtxt(path + "/data/{}_val_set.csv".format(dataset_name), delimiter="\n", dtype=np.int32)
+val_set = np.genfromtxt(path + "/data/SEG_val_set.csv", delimiter="\n", dtype=np.int32)
 x_val, y_val = generate_timeseries(val_set, 0, None, static_params["PAST_HISTORY"], static_params["FUTURE_TARGET"])
 val_data = tf.data.Dataset.from_tensor_slices((x_val, y_val))
 val_data = val_data.cache().batch(static_params["BATCH_SIZE"])
 
 
 # %%
-test_set = np.genfromtxt(path + "/data/{}_test_set_original.csv".format(dataset_name), delimiter="\n", dtype=np.int64)
-processed_test_set = pipeline.transform(test_set.copy())
-x_test, y_test = generate_timeseries(processed_test_set, 0, None, static_params["PAST_HISTORY"], static_params["FUTURE_TARGET"])
-
-
-# %%
-class ARSimple(keras.Model):
+class SEGARSimple(keras.Model):
     def __init__(self, units, dropout, output_steps, output_size):
         super().__init__()
         self.output_steps = output_steps
@@ -179,7 +167,7 @@ class ARSimple(keras.Model):
 
 
 # %%
-class ARMultiple(keras.Model):
+class SEGARMultiple(keras.Model):
     def __init__(self, units_1, units_2, dropout_1, dropout_2, output_steps, output_size):
         super().__init__()
         self.output_steps = output_steps
@@ -249,28 +237,35 @@ class ARMultiple(keras.Model):
 
 
 # %%
-model = ARSimple(
+model = SEGARSimple(
     units=hparams_multiple["HP_LSTM_1_UNITS"], dropout=hparams_multiple["HP_LSTM_1_DROPOUT"], 
     output_steps=static_params["FUTURE_TARGET"], output_size=static_params["VOCAB_SIZE"])
 
 # %% [markdown]
-# model = ARMultiple(
+# model = SEGARMultiple(
 #     units_1=hparams_multiple["HP_LSTM_1_UNITS"], units_2=hparams_multiple["HP_LSTM_2_UNITS"], dropout_1=hparams_multiple["HP_LSTM_1_DROPOUT"], 
 #     dropout_2=hparams_multiple["HP_LSTM_2_DROPOUT"], output_steps=static_params["FUTURE_TARGET"], output_size=static_params["VOCAB_SIZE"])
 
 # %%
 model.compile(
-    optimizer=keras.optimizers.Nadam(hparams_multiple["HP_LEARNING_RATE"]),
-    loss=tfa.losses.SigmoidFocalCrossEntropy(),
+    optimizer=keras.optimizers.Nadam(hparams_simple["HP_LEARNING_RATE"]),
+    loss="sparse_categorical_crossentropy",
     metrics=['accuracy']
 )
 
 
 # %%
+with open(path + "/static/test_pipeline.pkl", "rb") as p:
+    test_pipeline = dill.load(p)
+
+test_set = np.genfromtxt(path + "/data/SEG_test_set_original.csv", delimiter="\n", dtype=np.int64)
+processed_test_set = test_pipeline.transform(test_set.copy())
+x_test, y_test = generate_timeseries(processed_test_set, 0, None, static_params["PAST_HISTORY"], static_params["FUTURE_TARGET"])
+
 with tf.summary.create_file_writer(log_dir).as_default():
-    hp_api.hparams(hparams_multiple)
+    hp_api.hparams(hparams_simple, trial_id=timestamp)
     history = model.fit(train_data, validation_data=val_data, epochs=500, callbacks=[
-        keras.callbacks.EarlyStopping('val_loss', patience=5),
+        keras.callbacks.EarlyStopping('val_accuracy', patience=5),
         keras.callbacks.TensorBoard(log_dir)
         ])
 
@@ -282,25 +277,10 @@ with tf.summary.create_file_writer(log_dir).as_default():
 # %%
 model.summary()
 
-
-# %%
 tf.saved_model.save(model, version_dir, 
     signatures=model.call.get_concrete_function(tf.TensorSpec(shape=[None, None, 1], dtype=tf.int32, name="call")))
 
-
 # %%
-with open(path + "/version/{}/evaluate.csv".format(timestamp), "w") as r:
+with open("{}/version/{}/evaluate.csv".format(path, timestamp), "w") as r:
     r.write("loss, accuracy\n")
     r.write("{}, {}".format(loss, acc))
-
-# %% [markdown]
-# new_model = tf.saved_model.load("version/" + timestamp)
-# %% [markdown]
-# inference = new_model.signatures["serving_default"]
-# %% [markdown]
-# inference(tf.constant(x_train[0].reshape(1, -1, 1)))
-
-# %%
-
-
-
