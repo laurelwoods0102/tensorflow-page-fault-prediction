@@ -17,8 +17,8 @@ def log_prob_from_logits(x):
 def discretized_mix_logistic_loss(y_hat, y, num_class=2**8, log_scale_min=float(tf.math.log(1e-14)), reduce=True):
     y_hat_shape = y_hat.shape
 
-    #assert len(y_hat_shape) == 3
-    #assert y_hat_shape[2] % 3 == 0
+    assert len(y_hat_shape) == 3
+    assert y_hat_shape[2] % 3 == 0
 
     nr_mix = y_hat_shape[2] // 3
 
@@ -70,8 +70,8 @@ def discretized_mix_logistic_loss(y_hat, y, num_class=2**8, log_scale_min=float(
 def sample_from_discretized_mix_logistic(y, log_scale_min=float(tf.math.log(1e-14))):
     y_shape = y.shape
 
-    #assert len(y_shape) == 3
-    #assert y_shape[2] % 3 == 0
+    assert len(y_shape) == 3
+    assert y_shape[2] % 3 == 0
 
     nr_mix = y_shape[2] // 3
 
@@ -86,5 +86,5 @@ def sample_from_discretized_mix_logistic(y, log_scale_min=float(tf.math.log(1e-1
     u = tf.random.uniform(tf.shape(means), minval=1e-5, maxval=1. - 1e-5)
     x = means + tf.math.exp(log_scales) * (tf.math.log(u) - tf.math.log(1. - u))
 
-    x = tf.math.minimum(tf.math.minimum(x, -1.), 1.)
+    x = tf.math.minimum(tf.math.maximum(x, -1.), 1.)
     return x
