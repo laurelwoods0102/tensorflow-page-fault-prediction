@@ -213,7 +213,7 @@ class WaveNet(keras.Model):
                 self.residual_blocks.append(
                     ResidualBlock(
                         layer_index=i,
-                        dilation=self.dilations[0], 
+                        dilation=dilation, 
                         filter_width=self.filter_width, 
                         dilation_channels=self.dilation_channels, 
                         residual_channels=self.residual_channels, 
