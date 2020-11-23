@@ -12,7 +12,7 @@
         "timestamp": "20200918-150937",
         "accuracy": 0.6293277740478516
     },
-    "SEG_CNNLSTM(Bidirectional)":
+    "SEG_CNN+Encoder-Decoder(Bidirectional)":
     {
         "timestamp": "20200909-143624",
         "accuracy": 0.5208108108108108
