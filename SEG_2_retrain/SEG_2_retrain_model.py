@@ -38,7 +38,7 @@ param_list = dict()
 param_list["PAST_HISTORY"] = 16
 param_list["FUTURE_TARGET"] = 8
 param_list["BATCH_SIZE"] = 128
-param_list["EPOCHS"] = 100
+param_list["EPOCHS"] = 10000
 param_list["BUFFER_SIZE"] = 200000
 param_list["VOCAB_SIZE"] = vocab_size
 param_list["LEARNING_RATE"] = 0.01
@@ -106,12 +106,12 @@ model.compile(optimizer=keras.optimizers.Nadam(param_list["LEARNING_RATE"]), los
 
 
 
-model_history = model.fit(train_data, batch_size=param_list["BATCH_SIZE"], epochs=param_list["EPOCHS"], validation_data=val_data, callbacks=[keras.callbacks.EarlyStopping('val_accuracy', patience=5)])
+model_history = model.fit(train_data, batch_size=param_list["BATCH_SIZE"], epochs=param_list["EPOCHS"], validation_data=val_data, callbacks=[keras.callbacks.EarlyStopping('val_loss', patience=35)])
 
 
 #model.save("{}/version/{}".format(path, timestamp))
 model.save(version_dir)
-
+print(len(model_history.history["loss"]))
 
 
 

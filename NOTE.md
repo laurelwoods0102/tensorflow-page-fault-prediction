@@ -1,13 +1,14 @@
 # Tensorflow Page Fault Prediction
 
 ## Dataset
-1. GEMM
-2. NU
-3. SEG
-4. StreamBench
+1. GEMM ({GEMM_21gb_gpa_pf_stride.csv})
+2. GEMM_EX ({gem_3214_generic_*.csv})
+3. NU
+4. SEG
+5. StreamBench
     1. 1G1P
     2. 2G1P
-5. Stream_14gb_2vm
+6. Stream_14gb_2vm
 
 ***
 
