@@ -3,24 +3,26 @@ from tensorflow import keras
 import numpy as np
 import pandas as pd
 import os
+import json
 import datetime
+import dill
 
 
 
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
 
-path = os.path.dirname(os.path.abspath(__file__))
+
 
 dataset_name = "SEG_2_retrain"
 
 
+path = os.path.dirname(os.path.abspath(__file__))
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-version_dir = path + "/version/" + timestamp 
+version_dir = path + "version/" + timestamp 
 
-#os.makedirs(version_dir)
-#timestamp
+timestamp
 
 
 
@@ -29,20 +31,32 @@ vocab_size = vocabulary.shape[0]
 vocab_size
 
 
+with open("{}/best_hps/ht_1/best_hp_0.pkl".format(path), "rb") as f:
+    best_hp_0 = dill.load(f)
+
+
+
+best_hp_0.values
+
+
 
 param_list = dict()
 
 param_list["PAST_HISTORY"] = 16
 param_list["FUTURE_TARGET"] = 8
 param_list["BATCH_SIZE"] = 128
-param_list["EPOCHS"] = 10000
+param_list["EPOCHS"] = 1000
 param_list["BUFFER_SIZE"] = 200000
 param_list["VOCAB_SIZE"] = vocab_size
+
+# Tuned HPs
 param_list["LEARNING_RATE"] = 0.01
-param_list["NUM_1_NEURONS"] = 177
-param_list["NUM_2_NEURONS"] = 177
-param_list["DROPOUT_1"] = 0.1
-param_list["DROPOUT_2"] = 0.2
+param_list["NUM_1_NEURONS"] = 64
+param_list["NUM_2_NEURONS"] = 232
+param_list["DROPOUT_1"] = 0.45
+param_list["DROPOUT_2"] = 0.5
+param_list["SHUFFLE_SEED"] = 102
+param_list["BUFFER_SIZE"] = 200000
 
 
 
@@ -65,7 +79,7 @@ y_train = y_train.batch(param_list["BATCH_SIZE"])
 
 
 
-train_data = tf.data.Dataset.zip((x_train, y_train))
+train_data = tf.data.Dataset.zip((x_train, y_train))#.shuffle(param_list["BUFFER_SIZE"], seed=param_list["SHUFFLE_SEED"])   # shuffle not working
 
 
 
@@ -103,12 +117,13 @@ model.compile(optimizer=keras.optimizers.Nadam(param_list["LEARNING_RATE"]), los
 
 
 
-model_history = model.fit(train_data, batch_size=param_list["BATCH_SIZE"], epochs=param_list["EPOCHS"], validation_data=val_data, callbacks=[keras.callbacks.EarlyStopping('val_loss', patience=35)])
+model_history = model.fit(train_data, batch_size=param_list["BATCH_SIZE"], epochs=param_list["EPOCHS"], validation_data=val_data, callbacks=[keras.callbacks.EarlyStopping('val_accuracy', patience=7)])
 
 
-#model.save("{}/version/{}".format(path, timestamp))
+
 model.save(version_dir)
-print(len(model_history.history["loss"]))
+
+
 
 
 
