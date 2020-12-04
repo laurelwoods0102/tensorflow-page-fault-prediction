@@ -1,0 +1,14 @@
+{
+    "FILTERS": 240,
+    "KERNEL_SIZE": 56,
+    "NUM_1_NEURONS": 136,
+    "DROPOUT_1": 0.40000000000000013,
+    "NUM_2_NEURONS": 96,
+    "DROPOUT_2": 0.25000000000000006,
+    "LEARNING_RATE": 0.001,
+    "tuner/epochs": 10,
+    "tuner/initial_epoch": 4,
+    "tuner/bracket": 2,
+    "tuner/round": 2,
+    "tuner/trial_id": "660ebb0e96b61615e7e0c3c1830a35bc"
+}

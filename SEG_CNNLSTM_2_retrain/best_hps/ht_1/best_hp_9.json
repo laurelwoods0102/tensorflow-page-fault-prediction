@@ -1,0 +1,13 @@
+{
+    "FILTERS": 104,
+    "KERNEL_SIZE": 72,
+    "NUM_1_NEURONS": 104,
+    "DROPOUT_1": 0.15000000000000002,
+    "NUM_2_NEURONS": 64,
+    "DROPOUT_2": 0.30000000000000004,
+    "LEARNING_RATE": 0.001,
+    "tuner/epochs": 2,
+    "tuner/initial_epoch": 0,
+    "tuner/bracket": 2,
+    "tuner/round": 0
+}
