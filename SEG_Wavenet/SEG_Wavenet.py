@@ -286,7 +286,8 @@ version = 2
 
 # HParms follows the Diagram 
 batch_size = 1
-dilations = [1, 2, 4, 8, 16, 32, 64, 128]
+#dilations = [1, 2, 4, 8, 16, 32, 64, 128]
+dilations = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
 filter_width = 2        # == kernel_size
 #initial_filter_width = 32       # from (tacokr)
 dilation_channels = 32  # unknown
@@ -298,7 +299,8 @@ quantization_channels = 16293   # == vocab_size
 use_biases = False
 
 #receptive_field = 287      # Scalar Input
-receptive_field = 257       # Onehot Input
+#receptive_field = 257       # Onehot Input
+receptive_field = sum(dilations) + filter_width
 
 
 #wavenet.receptive_field = 287
@@ -351,11 +353,11 @@ wavenet.compile(keras.optimizers.Nadam(), loss=keras.losses.CategoricalCrossentr
 
 
 
-wavenet.fit(train_x, train_y, batch_size=128, epochs=300, callbacks=[keras.callbacks.EarlyStopping(monitor="loss", patience=5)])
+wavenet.fit(train_x, train_y, batch_size=32, epochs=10000, callbacks=[keras.callbacks.EarlyStopping(monitor="loss", patience=5, restore_best_weights=True)])
 
 
 
-wavenet.save("{}/model/model_{}".format(path, version))
+wavenet.save("{}/version/model_{}".format(path, version))
 
 
 
